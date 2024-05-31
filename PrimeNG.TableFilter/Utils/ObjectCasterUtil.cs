@@ -1,4 +1,5 @@
 using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Reflection;
 using Newtonsoft.Json.Linq;
@@ -47,6 +48,32 @@ namespace PrimeNG.TableFilter.Utils
                 return arrayCast.ToObject<List<byte>>();
             if (property?.PropertyType == typeof(byte?))
                 return arrayCast.ToObject<List<byte?>>();
+            if (property?.PropertyType.IsEnum == true)
+            {
+                Type listType = typeof(List<>).MakeGenericType(property?.PropertyType);
+                var enumArray = (IList)Activator.CreateInstance(listType);
+                // Cast each element of the input array to the enum type and add to the enum array
+                foreach (var row in arrayCast)
+                {
+                    enumArray.Add(Enum.ToObject(property?.PropertyType,Convert.ToByte(row)));
+                }
+                return enumArray;
+            }
+            if (property?.PropertyType.IsGenericType == true &&
+                property.PropertyType.GetGenericTypeDefinition() == typeof(Nullable<>) &&
+                property.PropertyType.GetGenericArguments()[0].IsEnum)
+            {
+                Type enumType = property.PropertyType.GetGenericArguments()[0];
+
+                Type listType = typeof(List<>).MakeGenericType(enumType);
+                var enumArray = (IList)Activator.CreateInstance(listType);
+                // Cast each element of the input array to the enum type and add to the enum array
+                foreach (var row in arrayCast)
+                {
+                    enumArray.Add(Enum.ToObject(enumType, Convert.ToByte(row)));
+                }
+                return enumArray;
+            }
 
             return arrayCast.ToObject<List<string>>();
         }
@@ -93,8 +120,8 @@ namespace PrimeNG.TableFilter.Utils
             if (property?.PropertyType.IsEnum == true)
                 return Enum.ToObject(property.PropertyType, value);
             if (property?.PropertyType.IsGenericType == true &&
-    property.PropertyType.GetGenericTypeDefinition() == typeof(Nullable<>) &&
-    property.PropertyType.GetGenericArguments()[0].IsEnum)
+                property.PropertyType.GetGenericTypeDefinition() == typeof(Nullable<>) &&
+                property.PropertyType.GetGenericArguments()[0].IsEnum)
             {
                 Type enumType = property.PropertyType.GetGenericArguments()[0];
                 return Enum.ToObject(enumType, value);

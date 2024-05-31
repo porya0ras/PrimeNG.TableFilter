@@ -1,6 +1,7 @@
 using PrimeNG.TableFilter.Models;
 using PrimeNG.TableFilter.Utils;
 using System;
+using System.Collections;
 using System.Linq;
 using System.Linq.Dynamic.Core;
 using System.Linq.Expressions;
