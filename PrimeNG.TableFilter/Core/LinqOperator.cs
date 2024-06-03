@@ -386,6 +386,26 @@ namespace PrimeNG.TableFilter.Core
                             AddNormalExpression(operatorAction, dynamicExpression.Body);
                         break;
                     }
+                case LinqOperatorConstants.ConstantBeforeEqual:
+                    {
+                        var x = _context.ParameterExpression;
+                        dynamicExpression = DynamicExpressionParser.ParseLambda(new[] { x }, null, $"{propertyName}<=@0", dateTime);
+                        if (isNegation)
+                            AddNegationExpression(operatorAction, dynamicExpression.Body);
+                        else
+                            AddNormalExpression(operatorAction, dynamicExpression.Body);
+                        break;
+                    }
+                case LinqOperatorConstants.ConstantAfterEqual:
+                    {
+                        var x = _context.ParameterExpression;
+                        dynamicExpression = DynamicExpressionParser.ParseLambda(new[] { x }, null, $"{propertyName}>=@0", dateTime);
+                        if (isNegation)
+                            AddNegationExpression(operatorAction, dynamicExpression.Body);
+                        else
+                            AddNormalExpression(operatorAction, dynamicExpression.Body);
+                        break;
+                    }
             }
         }
 

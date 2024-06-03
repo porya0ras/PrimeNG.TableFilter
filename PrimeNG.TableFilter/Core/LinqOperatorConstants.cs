@@ -19,6 +19,8 @@ namespace PrimeNG.TableFilter.Core
 
         public const string ConstantDateIs = "DateIs";
         public const string ConstantBefore = "DateBefore";
+        public const string ConstantBeforeEqual = "DateBeforeOrEqual";
         public const string ConstantAfter = "DateAfter";
+        public const string ConstantAfterEqual = "DateAfterOrEqual";
     }
 }
