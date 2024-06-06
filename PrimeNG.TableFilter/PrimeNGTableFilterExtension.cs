@@ -40,6 +40,27 @@ namespace PrimeNG.TableFilter
         public static IQueryable<T> PrimengTableFilter<T>(this IQueryable<T> dataSet,
             TableFilterModel tableFilterPayload, out int totalRecord)
         {
+            return PrimengTableFilterInside(dataSet, tableFilterPayload, out totalRecord);
+        }
+
+        /// <summary>
+        /// Extension method for filter Iterable Object use PrimeNG load lazy filter payload Without Paging (ignore rows and first)
+        /// </summary>
+        /// <remarks>This extension method for object type IQueryable</remarks>
+        /// <typeparam name="T">Type of entity for filter</typeparam>
+        /// <param name="dataSet">Data for filter</param>
+        /// <param name="tableFilterPayload">PrimeNG filter payload</param>
+        /// <param name="totalRecord">Total of record</param>
+        /// <returns></returns>
+        public static IQueryable<T> PrimengTableFilterWithoutPaging<T>(this IQueryable<T> dataSet,
+            TableFilterModel tableFilterPayload, out int totalRecord)
+        {
+            return PrimengTableFilterInside(dataSet, tableFilterPayload, out totalRecord,true);
+        }
+
+        private static IQueryable<T> PrimengTableFilterInside<T>(this IQueryable<T> dataSet,
+            TableFilterModel tableFilterPayload, out int totalRecord,bool ignorePaging = false)
+        {
             ITableFilterManager<T> tableFilterManager = new TableFilterManager<T>(dataSet);
 
 
@@ -52,17 +73,17 @@ namespace PrimeNG.TableFilter
                     switch (filterToken)
                     {
                         case JArray _:
-                        {
-                            var filters = filterToken.ToObject<List<TableFilterContext>>();
-                            tableFilterManager.FiltersDataSet(filterContext.Key, filters);
-                            break;
-                        }
+                            {
+                                var filters = filterToken.ToObject<List<TableFilterContext>>();
+                                tableFilterManager.FiltersDataSet(filterContext.Key, filters);
+                                break;
+                            }
                         case JObject _:
-                        {
+                            {
                                 var filter = filterToken.ToObject<TableFilterContext>();
                                 tableFilterManager.FilterDataSet(filterContext.Key, filter);
-                            break;
-                        }
+                                break;
+                            }
                     }
                 }
                 tableFilterManager.ExecuteFilter();
@@ -80,8 +101,12 @@ namespace PrimeNG.TableFilter
 
             dataSet = tableFilterManager.GetResult();
             totalRecord = dataSet.Count();
-            dataSet = dataSet.Skip(tableFilterPayload.First).Take(tableFilterPayload.Rows);
+            if (!ignorePaging)
+            {
+                dataSet = dataSet.Skip(tableFilterPayload.First).Take(tableFilterPayload.Rows);
+            }
             return dataSet;
         }
+
     }
 }
