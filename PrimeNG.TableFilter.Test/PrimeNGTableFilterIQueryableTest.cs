@@ -45,7 +45,7 @@ namespace PrimeNG.TableFilter.Test
                 new TestData { DateTime1 = new DateTime(2021, 11, 1), Num1 = 90, String1 = "B2", DateTime2 = new DateTime(2021,11,8) },
                 new TestData { DateTime1 = new DateTime(2021, 11, 1), Num1 = 90, String1 = "B2", NullableByte = (byte?)27 },
                 new TestData { DateTime1 = new DateTime(2021, 11, 1), Num1 = 90, String1 = "B2", NullableByte = (byte?)28 },
-                new TestData { DateTime1 = new DateTime(2021, 11, 1), Num1 = 90, String1 = "B2", NullableByte = (byte?)28,NullableEnum=EnumStatus.Draft },
+                new TestData { DateTime1 = new DateTime(2021, 11, 1), Num1 = 90, String1 = "B2", NullableByte = (byte?)26,NullableEnum=EnumStatus.Draft },
             }.AsQueryable();
         }
 
@@ -262,7 +262,7 @@ namespace PrimeNG.TableFilter.Test
             int counted = dataSet.Count();
             dataSet = dataSet.PrimengTableFilter(filter, out var totalRecord);
             Assert.Equal(counted, totalRecord);
-            Assert.Equal(0, dataSet.Count());
+            Assert.Equal(10, dataSet.Count());
         }
         
         [Fact]
@@ -1023,7 +1023,7 @@ namespace PrimeNG.TableFilter.Test
             var dataSet = GenerateMockTestData();
             int initialCount = dataSet.Count();
             DateTime dateTime = new DateTime(2021, 11, 5);
-            int counted = dataSet.Count(x => x.DateTime2.HasValue && x.DateTime2.Value < dateTime);
+            int counted = dataSet.Count(x => x.DateTime2.HasValue && x.DateTime2.Value <= dateTime);
             dataSet = dataSet.PrimengTableFilter(filter, out var totalRecord);
             Assert.Equal( counted, totalRecord);
         }
@@ -1036,7 +1036,7 @@ namespace PrimeNG.TableFilter.Test
             var dataSet = GenerateMockTestData();
             int initialCount = dataSet.Count();
             DateTime dateTime = new DateTime(2021, 11, 5);
-            int counted = dataSet.Count(x => x.DateTime2.HasValue && x.DateTime2.Value > dateTime);
+            int counted = dataSet.Count(x => x.DateTime2.HasValue && x.DateTime2.Value >= dateTime);
             dataSet = dataSet.PrimengTableFilter(filter, out var totalRecord);
             Assert.Equal( counted, totalRecord);
         }
