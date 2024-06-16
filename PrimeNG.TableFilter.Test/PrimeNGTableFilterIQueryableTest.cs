@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using Microsoft.VisualBasic;
 using Newtonsoft.Json;
 using PrimeNG.TableFilter.Models;
 using Xunit;
@@ -330,6 +331,20 @@ namespace PrimeNG.TableFilter.Test
             var dataSet = GenerateMockTestData();
             dataSet = dataSet.PrimengTableFilter(filter, out var totalRecord);
             Assert.Equal(3, totalRecord);
+        }
+
+        [Fact]
+        public void String_Concat_Contains_In_Test()
+        {
+            var filter = GenerateFilterTableFromJson("{ filters: { Number: [ { matchMode: \"in\", operator: \"and\", value: [\"Best\"] } ] } , first: 0, globalFilter: null, multiSortMeta: undefined, rows: 10,sortOrder: -1 }");
+            string prefix = "test_";
+            var dataSet = GenerateMockTestData().Select(
+            e=>new
+            {
+                    Number= prefix+e.NullableInt
+            });
+            dataSet = dataSet.PrimengTableFilter(filter, out var totalRecord);
+            Assert.Equal(0, totalRecord);
         }
 
         [Fact]
