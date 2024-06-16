@@ -1,7 +1,9 @@
+using Newtonsoft.Json.Linq;
 using PrimeNG.TableFilter.Models;
 using PrimeNG.TableFilter.Utils;
 using System;
 using System.Collections;
+using System.Collections.Generic;
 using System.Linq;
 using System.Linq.Dynamic.Core;
 using System.Linq.Expressions;
@@ -35,24 +37,61 @@ namespace PrimeNG.TableFilter.Core
                 return;
 
             var castValue = ObjectCasterUtil.CastPropertiesTypeList(property, propertyValue);
-            var methodInfo = castValue.GetType()
-                .GetMethod(LinqOperatorConstants.ConstantContains, new[] { propertyType });
+           
 
-            var list = Expression.Constant(castValue);
-            var value = Expression.Property(_context.ParameterExpression, propertyName);
-            AddNormalExpression(operatorAction, list, methodInfo, value);
+            switch(castValue)
+            {
+                case List<string> _:
+                    {
+                        // Access the String1 property
+                        var propertyAccess = Expression.MakeMemberAccess(_context.ParameterExpression,
+                                property ?? throw new InvalidOperationException());
+
+                        var ComparisonType = typeof(StringComparison);
+                        var ComparisonConstant = Expression.Constant(StringComparison.OrdinalIgnoreCase);
+                        // MethodInfo for the String.Contains method
+                        var methodInfo = propertyType.GetMethod(LinqOperatorConstants.ConstantContains, new[] { propertyType, ComparisonType });
+
+                        var value = Expression.Property(_context.ParameterExpression, propertyName);
+
+                        // Expressions for the value list
+                        var containsExpressions = ((List<string>)castValue)
+                                   .Select(v => Expression.Call(propertyAccess, methodInfo ?? throw new InvalidOperationException(), Expression.Constant(v), ComparisonConstant))
+                                   .ToArray();
+
+                        // Combine all contains expressions with OR
+                        Expression combinedExpression = containsExpressions
+                            .Aggregate<Expression, Expression>(null, (current, next) =>
+                                current == null ? next : Expression.OrElse(current, next));
+
+                        AddLambdaExpression(operatorAction, combinedExpression);
+
+                        return;
+                    }
+                default:
+                    {
+                        var methodInfo = castValue.GetType().GetMethod(LinqOperatorConstants.ConstantContains, new[] { propertyType });
+                        var list = Expression.Constant(castValue);
+                        var value = Expression.Property(_context.ParameterExpression, propertyName);
+                        AddNormalExpression(operatorAction, list, methodInfo, value);
+                        return;
+                    }
+            }
+
+           
+
         }
 
         public void AddFilterProperty(
-            string propertyName, 
-            object propertyValue, 
+            string propertyName,
+            object propertyValue,
             string extensionMethod,
-            OperatorEnumeration operatorAction, 
+            OperatorEnumeration operatorAction,
             bool isNegation = false)
         {
             var property = _context.DataSetType.GetProperty(propertyName);
             var propertyType = property?.PropertyType;
-            
+
             if (propertyType == null)
                 return;
 
@@ -113,9 +152,9 @@ namespace PrimeNG.TableFilter.Core
 
         }
         private void AddNormalExpression(
-            OperatorEnumeration operatorAction, 
+            OperatorEnumeration operatorAction,
             Expression propertyAccess,
-            MethodInfo methodInfo, 
+            MethodInfo methodInfo,
             Expression converted)
         {
             var callMethod = Expression.Call(propertyAccess,

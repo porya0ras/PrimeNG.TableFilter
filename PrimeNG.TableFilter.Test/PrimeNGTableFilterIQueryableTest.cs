@@ -322,6 +322,16 @@ namespace PrimeNG.TableFilter.Test
             dataSet = dataSet.PrimengTableFilter(filter, out var totalRecord);
             Assert.Equal(1, totalRecord);
         }
+
+        [Fact]
+        public void String_Contains_In_Test()
+        {
+            var filter = GenerateFilterTableFromJson("{ filters: { string1: [ { matchMode: \"in\", operator: \"and\", value: [\"Best\"] } ] } , first: 0, globalFilter: null, multiSortMeta: undefined, rows: 10,sortOrder: -1 }");
+            var dataSet = GenerateMockTestData();
+            dataSet = dataSet.PrimengTableFilter(filter, out var totalRecord);
+            Assert.Equal(3, totalRecord);
+        }
+
         [Fact]
         [Trait("Category", "Nullable")]
         [Trait("Type", "Bool")]
