@@ -126,6 +126,17 @@ namespace PrimeNG.TableFilter.Test
         }
 
         [Fact]
+        public void Order_Table_Where_Multi_Field_Num1_String1_TestV2()
+        {
+            var filter = GenerateFilterTableFromJson("{ filters: { string1: { value: \"test7\", matchMode: \"contains\" }, num1: { value: \"9\", matchMode: \"equals\" }  } , first: 0, globalFilter: null, multiSortMeta: undefined, rows: 10, sortField: \"Num1\",sortOrder: -1 }");
+            var dataSet = GenerateMockTestData();
+            dataSet = dataSet.PrimengTableFilter(filter, out var totalRecord);
+            Assert.Single(dataSet);
+            Assert.Equal(9, dataSet.FirstOrDefault()?.Num1);
+            Assert.Equal(1, totalRecord);
+        }
+
+        [Fact]
         public void Order_Table_First_3_Row_5_Test()
         {
             var filter = GenerateFilterTableFromJson("{ filters: {} , first: 3, globalFilter: null, multiSortMeta: undefined, rows: 5, sortField: \"\",sortOrder: -1 }");
