@@ -21,7 +21,17 @@ namespace PrimeNG.TableFilter.Core
             {
                 DataSet = dataSet,
                 DataSetType = typeof(TEntity),
-                ParameterExpression = Expression.Parameter(typeof(TEntity), "e")
+                ParameterExpression = Expression.Parameter(typeof(TEntity), "e"),
+            };
+        }
+        public LinqOperator(IQueryable<TEntity> dataSet, bool IsIEnumerable = false)
+        {
+            _context = new LinqContext<TEntity>
+            {
+                DataSet = dataSet,
+                DataSetType = typeof(TEntity),
+                ParameterExpression = Expression.Parameter(typeof(TEntity), "e"),
+                IsIEnumerable = IsIEnumerable
             };
         }
 
@@ -37,9 +47,9 @@ namespace PrimeNG.TableFilter.Core
                 return;
 
             var castValue = ObjectCasterUtil.CastPropertiesTypeList(property, propertyValue);
-           
 
-            switch(castValue)
+
+            switch (castValue)
             {
                 case List<string> _:
                     {
@@ -47,16 +57,28 @@ namespace PrimeNG.TableFilter.Core
                         var propertyAccess = Expression.MakeMemberAccess(_context.ParameterExpression,
                                 property ?? throw new InvalidOperationException());
 
+                        List<Type> propertyTypes = new List<Type>();
+                        List<Expression> expressions = new List<Expression>();
+
                         var ComparisonType = typeof(StringComparison);
                         var ComparisonConstant = Expression.Constant(StringComparison.OrdinalIgnoreCase);
+
+                        propertyTypes.Add(propertyType);
+
+                        if(_context.IsIEnumerable)
+                        {
+                            propertyTypes.Add(ComparisonType);
+                        }
+
                         // MethodInfo for the String.Contains method
-                        var methodInfo = propertyType.GetMethod(LinqOperatorConstants.ConstantContains, new[] { propertyType, ComparisonType });
+                        var methodInfo = propertyType.GetMethod(LinqOperatorConstants.ConstantContains, propertyTypes.ToArray());
 
                         var value = Expression.Property(_context.ParameterExpression, propertyName);
 
                         // Expressions for the value list
                         var containsExpressions = ((List<string>)castValue)
-                                   .Select(v => Expression.Call(propertyAccess, methodInfo ?? throw new InvalidOperationException(), Expression.Constant(v), ComparisonConstant))
+                                   .Select(v => _context.IsIEnumerable ? Expression.Call(propertyAccess, methodInfo ?? throw new InvalidOperationException(), Expression.Constant(v), ComparisonConstant)
+                                   : Expression.Call(propertyAccess, methodInfo ?? throw new InvalidOperationException(), Expression.Constant(v)))
                                    .ToArray();
 
                         // Combine all contains expressions with OR
@@ -78,7 +100,7 @@ namespace PrimeNG.TableFilter.Core
                     }
             }
 
-           
+
 
         }
 
@@ -133,14 +155,26 @@ namespace PrimeNG.TableFilter.Core
                             var propertyAccess = Expression.MakeMemberAccess(_context.ParameterExpression,
                                 property ?? throw new InvalidOperationException());
 
-                            var ComparisonType = typeof(StringComparison);
-                            var ComparisonConstant = Expression.Constant(StringComparison.OrdinalIgnoreCase);
+                            List<Type> propertyTypes = new List<Type>();
+                            List<Expression> expressions = new List<Expression>();
 
-                            var methodInfo = propertyType.GetMethod(extensionMethod, new[] { propertyType, ComparisonType });
+                            propertyTypes.Add(propertyType);
+                            expressions.Add(propertyConstant);
+
+                            if (_context.IsIEnumerable)
+                            {
+                                var ComparisonType = typeof(StringComparison);
+                                var ComparisonConstant = Expression.Constant(StringComparison.OrdinalIgnoreCase);
+
+                                propertyTypes.Add(ComparisonType);
+                                expressions.Add(ComparisonConstant);
+                            }
+
+                            var methodInfo = propertyType.GetMethod(extensionMethod, propertyTypes.ToArray());
                             if (isNegation)
-                                AddNegationExpression(operatorAction, propertyAccess, methodInfo, propertyConstant, ComparisonConstant);
+                                AddNegationExpression(operatorAction, propertyAccess, methodInfo, expressions.ToArray());
                             else
-                                AddNormalExpression(operatorAction, propertyAccess, methodInfo, propertyConstant, ComparisonConstant);
+                                AddNormalExpression(operatorAction, propertyAccess, methodInfo, expressions.ToArray());
                             break;
                         }
                     // nullable numeric type

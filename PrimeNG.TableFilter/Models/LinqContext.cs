@@ -10,5 +10,6 @@ namespace PrimeNG.TableFilter.Models
         public ParameterExpression ParameterExpression { get; set; }
         public Type DataSetType { get; set; }
         public Expression<Func<TEntity, bool>> Expressions { get; set; }
+        public bool IsIEnumerable { get; set; }
     }
 }

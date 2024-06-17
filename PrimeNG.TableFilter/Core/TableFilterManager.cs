@@ -35,6 +35,7 @@ namespace PrimeNG.TableFilter.Core
         private readonly ILinqOperator<TEntity> _linqOperator;
 
         public TableFilterManager(IQueryable<TEntity> dataSet) => _linqOperator = new LinqOperator<TEntity>(dataSet);
+        public TableFilterManager(IQueryable<TEntity> dataSet,bool IsIEnumerable=false) => _linqOperator = new LinqOperator<TEntity>(dataSet, IsIEnumerable);
 
         /// <summary>
         /// Set multiple condition for ordering data set to LINQ Operation context

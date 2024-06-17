@@ -11,5 +11,6 @@ namespace PrimeNG.TableFilter.Models
         public string SortField { get; set; }
         public int SortOrder { get; set; }
         public List<TableFilterSortMeta> MultiSortMeta { get; set; }
+        public bool IsIEnumerable { get; set; }
     }
 }

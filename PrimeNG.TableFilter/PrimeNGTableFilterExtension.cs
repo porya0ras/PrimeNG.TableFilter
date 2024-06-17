@@ -24,6 +24,7 @@ namespace PrimeNG.TableFilter
             TableFilterModel tableFilterPayload, out int totalRecord)
         {
             var resultSet = dataSet.AsQueryable();
+            tableFilterPayload.IsIEnumerable = true;
             resultSet = resultSet.PrimengTableFilter(tableFilterPayload, out totalRecord);
             return resultSet.AsEnumerable();
         }
@@ -61,8 +62,7 @@ namespace PrimeNG.TableFilter
         private static IQueryable<T> PrimengTableFilterInside<T>(this IQueryable<T> dataSet,
             TableFilterModel tableFilterPayload, out int totalRecord,bool ignorePaging = false)
         {
-            ITableFilterManager<T> tableFilterManager = new TableFilterManager<T>(dataSet);
-
+            ITableFilterManager<T> tableFilterManager = new TableFilterManager<T>(dataSet, tableFilterPayload.IsIEnumerable);
 
             if (tableFilterPayload.Filters != null && tableFilterPayload.Filters.Any())
             {
