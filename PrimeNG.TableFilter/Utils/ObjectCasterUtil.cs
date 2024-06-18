@@ -24,6 +24,10 @@ namespace PrimeNG.TableFilter.Utils
                 return arrayCast.ToObject<List<DateTime>>();
             if (property?.PropertyType == typeof(DateTime?))
                 return arrayCast.ToObject<List<DateTime?>>();
+            if (property?.PropertyType == typeof(DateTimeOffset))
+                return arrayCast.ToObject<List<DateTimeOffset>>();
+            if (property?.PropertyType == typeof(DateTimeOffset?))
+                return arrayCast.ToObject<List<DateTimeOffset?>>();
             if (property?.PropertyType == typeof(bool))
                 return arrayCast.ToObject<List<bool>>();
             if (property?.PropertyType == typeof(bool?))
@@ -93,6 +97,10 @@ namespace PrimeNG.TableFilter.Utils
                 return Convert.ToDateTime(value);
             if (property?.PropertyType == typeof(DateTime?))
                 return Convert.ToDateTime(value);
+            if (property?.PropertyType == typeof(DateTimeOffset))
+                return DateTimeOffset.Parse(value.ToString());
+            if (property?.PropertyType == typeof(DateTimeOffset?))
+                return DateTimeOffset.Parse(value.ToString());
             if (property?.PropertyType == typeof(bool))
                 return Convert.ToBoolean(value);
             if (property?.PropertyType == typeof(bool?))

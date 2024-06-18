@@ -65,7 +65,7 @@ namespace PrimeNG.TableFilter.Core
 
                         propertyTypes.Add(propertyType);
 
-                        if(_context.IsIEnumerable)
+                        if (_context.IsIEnumerable)
                         {
                             propertyTypes.Add(ComparisonType);
                         }
@@ -130,6 +130,9 @@ namespace PrimeNG.TableFilter.Core
                     case DateTime _:
                         ComposeLambdaForDateTimeProperty(propertyName, extensionMethod, operatorAction, isNegation, castValue);
                         break;
+                    case DateTimeOffset _:
+                        ComposeLambdaForDateTimeOffsetProperty(propertyName, extensionMethod, operatorAction, isNegation, castValue);
+                        break;
                     case bool _:
                         // boolean only have "equals" and "notEquals" match modes
                         ComposeEqualsLinqExpression(propertyName, operatorAction, isNegation, castValue, _context.ParameterExpression);
@@ -144,6 +147,10 @@ namespace PrimeNG.TableFilter.Core
             {
                 switch (castValue)
                 {
+
+                    case DateTimeOffset _:
+                        ComposeLambdaForDateTimeOffsetProperty(propertyName, extensionMethod, operatorAction, isNegation, castValue);
+                        break;
                     case DateTime _:
                         ComposeLambdaForDateTimeProperty(propertyName, extensionMethod, operatorAction, isNegation, castValue);
                         break;
@@ -337,7 +344,8 @@ namespace PrimeNG.TableFilter.Core
         /// <returns></returns>
         private static bool IsPropertyTypeAndFilterMatchModeValid(Type propertyType, string extensionMethod)
         {
-            if (propertyType == typeof(DateTime) || propertyType == typeof(DateTime?))
+            if (propertyType == typeof(DateTime) || propertyType == typeof(DateTime?)
+                || propertyType == typeof(DateTimeOffset) || propertyType == typeof(DateTimeOffset?))
             {
                 var validDateTimeLinqMethods = new[] { LinqOperatorConstants.ConstantDateIs, LinqOperatorConstants.ConstantBefore, LinqOperatorConstants.ConstantAfter };
                 return validDateTimeLinqMethods.Contains(extensionMethod);
@@ -445,6 +453,80 @@ namespace PrimeNG.TableFilter.Core
         private void ComposeLambdaForDateTimeProperty(string propertyName, string extensionMethod, OperatorEnumeration operatorAction, bool isNegation, object castValue)
         {
             var dateTime = (DateTime)castValue;
+            LambdaExpression dynamicExpression;
+            var hoursDefined = dateTime.TimeOfDay.Hours > 0;
+            var minutesDefined = dateTime.TimeOfDay.Minutes > 0;
+            var secondsDefined = dateTime.TimeOfDay.Seconds > 0;
+            var isTimeDefined = hoursDefined || minutesDefined || secondsDefined;
+            switch (extensionMethod)
+            {
+                case LinqOperatorConstants.ConstantDateIs:
+                    {
+                        var x = _context.ParameterExpression;
+
+                        dynamicExpression = isTimeDefined ?
+                             DynamicExpressionParser.ParseLambda(new[] { x }, null, $"{propertyName}==@0", dateTime)
+                            : DynamicExpressionParser.ParseLambda(new[] { x }, null, $"{propertyName}>=@0 && {propertyName}<= @1", dateTime.Date, dateTime.Date.AddDays(1).AddTicks(-1));
+                        if (isNegation)
+                            AddNegationExpression(operatorAction, dynamicExpression.Body);
+                        else
+                            AddNormalExpression(operatorAction, dynamicExpression.Body);
+                        break;
+                    }
+                case LinqOperatorConstants.ConstantBefore:
+                    {
+                        var x = _context.ParameterExpression;
+                        dynamicExpression = DynamicExpressionParser.ParseLambda(new[] { x }, null, $"{propertyName}<=@0", dateTime);
+                        if (isNegation)
+                            AddNegationExpression(operatorAction, dynamicExpression.Body);
+                        else
+                            AddNormalExpression(operatorAction, dynamicExpression.Body);
+                        break;
+                    }
+                case LinqOperatorConstants.ConstantAfter:
+                    {
+                        var x = _context.ParameterExpression;
+                        dynamicExpression = DynamicExpressionParser.ParseLambda(new[] { x }, null, $"{propertyName}>=@0", dateTime);
+                        if (isNegation)
+                            AddNegationExpression(operatorAction, dynamicExpression.Body);
+                        else
+                            AddNormalExpression(operatorAction, dynamicExpression.Body);
+                        break;
+                    }
+                case LinqOperatorConstants.ConstantBeforeEqual:
+                    {
+                        var x = _context.ParameterExpression;
+                        dynamicExpression = DynamicExpressionParser.ParseLambda(new[] { x }, null, $"{propertyName}<=@0", dateTime);
+                        if (isNegation)
+                            AddNegationExpression(operatorAction, dynamicExpression.Body);
+                        else
+                            AddNormalExpression(operatorAction, dynamicExpression.Body);
+                        break;
+                    }
+                case LinqOperatorConstants.ConstantAfterEqual:
+                    {
+                        var x = _context.ParameterExpression;
+                        dynamicExpression = DynamicExpressionParser.ParseLambda(new[] { x }, null, $"{propertyName}>=@0", dateTime);
+                        if (isNegation)
+                            AddNegationExpression(operatorAction, dynamicExpression.Body);
+                        else
+                            AddNormalExpression(operatorAction, dynamicExpression.Body);
+                        break;
+                    }
+            }
+        }
+
+        /// <summary>
+        /// Composes LINQ expression for date time offset based on <paramref name="extensionMethod"/>
+        /// </summary>
+        /// <param name="propertyName">Name of property to compose expression</param>
+        /// <param name="extensionMethod">Extension method for which expression is composed</param>
+        /// <param name="operatorAction">Operator action for expression</param>
+        /// <param name="isNegation">Flag that indicates if expression should be negation</param>
+        /// <param name="castValue">Casted value of <paramref name="propertyName"/></param>
+        private void ComposeLambdaForDateTimeOffsetProperty(string propertyName, string extensionMethod, OperatorEnumeration operatorAction, bool isNegation, object castValue)
+        {
+            var dateTime = (DateTimeOffset)castValue;
             LambdaExpression dynamicExpression;
             var hoursDefined = dateTime.TimeOfDay.Hours > 0;
             var minutesDefined = dateTime.TimeOfDay.Minutes > 0;

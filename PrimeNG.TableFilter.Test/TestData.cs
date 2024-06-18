@@ -17,6 +17,7 @@ namespace PrimeNG.TableFilter.Test
         public decimal? NullableDecimal { get; set; }
         public byte? NullableByte { get; set; }
         public EnumStatus Enum1 { get; set; } = EnumStatus.Draft;
-        public EnumStatus? NullableEnum { get; set; } 
+        public EnumStatus? NullableEnum { get; set; }
+        public DateTimeOffset DateTimeOff1 { get; set; } = new DateTimeOffset();
     }
 }
