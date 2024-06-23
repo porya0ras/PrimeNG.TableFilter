@@ -345,6 +345,15 @@ namespace PrimeNG.TableFilter.Test
         }
 
         [Fact]
+        public void NullablShortFilterShouldReturnSingleElementV2()
+        {
+            var filter = GenerateFilterTableFromJson("{ filters: { nullableShort: { value: null, matchMode: \"equals\" }  } , first: 0, globalFilter: null, multiSortMeta: undefined, rows: 10,sortOrder: -1 }");
+            var dataSet = GenerateMockTestData();
+            dataSet = dataSet.PrimengTableFilter(filter, out var totalRecord);
+            Assert.Equal(22, totalRecord);
+        }
+
+        [Fact]
         public void EnumFilterShouldReturnOneElement()
         {
             var filter = GenerateFilterTableFromJson("{ filters: { Enum1: { value: 2, matchMode: \"equals\" }  } , first: 0, globalFilter: null, multiSortMeta: undefined, rows: 10,sortOrder: -1 }");

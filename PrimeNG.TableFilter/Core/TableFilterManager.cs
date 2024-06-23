@@ -107,9 +107,6 @@ namespace PrimeNG.TableFilter.Core
         /// <exception cref="System.ArgumentException">Throws invalid match mode exception</exception>
         private void BaseFilterDataSet(string key, TableFilterContext value, OperatorEnumeration operatorAction)
         {
-            if (value.Value == null)
-                return;
-
             switch (value.MatchMode)
             {
                 case ConstantTypeMatchModeStartsWith:
