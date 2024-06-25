@@ -476,7 +476,10 @@ namespace PrimeNG.TableFilter.Core
                 case LinqOperatorConstants.ConstantBefore:
                     {
                         var x = _context.ParameterExpression;
-                        dynamicExpression = DynamicExpressionParser.ParseLambda(new[] { x }, null, $"{propertyName}<=@0", dateTime);
+                        dynamicExpression = isTimeDefined ? 
+                            DynamicExpressionParser.ParseLambda(new[] { x }, null, $"{propertyName}<=@0", dateTime)
+                            : DynamicExpressionParser.ParseLambda(new[] { x }, null, $"{propertyName}<=@0", dateTime.Date);
+
                         if (isNegation)
                             AddNegationExpression(operatorAction, dynamicExpression.Body);
                         else
@@ -486,7 +489,9 @@ namespace PrimeNG.TableFilter.Core
                 case LinqOperatorConstants.ConstantAfter:
                     {
                         var x = _context.ParameterExpression;
-                        dynamicExpression = DynamicExpressionParser.ParseLambda(new[] { x }, null, $"{propertyName}>=@0", dateTime);
+                        dynamicExpression = isTimeDefined ? 
+                            DynamicExpressionParser.ParseLambda(new[] { x }, null, $"{propertyName}>=@0", dateTime)
+                            : DynamicExpressionParser.ParseLambda(new[] { x }, null, $"{propertyName}>=@0", dateTime.Date.AddDays(1).AddTicks(-1));
                         if (isNegation)
                             AddNegationExpression(operatorAction, dynamicExpression.Body);
                         else
