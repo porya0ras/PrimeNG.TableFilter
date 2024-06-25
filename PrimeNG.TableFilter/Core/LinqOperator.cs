@@ -478,7 +478,7 @@ namespace PrimeNG.TableFilter.Core
                         var x = _context.ParameterExpression;
                         dynamicExpression = isTimeDefined ? 
                             DynamicExpressionParser.ParseLambda(new[] { x }, null, $"{propertyName}<=@0", dateTime)
-                            : DynamicExpressionParser.ParseLambda(new[] { x }, null, $"{propertyName}<=@0", dateTime.Date);
+                            : DynamicExpressionParser.ParseLambda(new[] { x }, null, $"{propertyName}<=@0", dateTime.Date.AddDays(1).AddTicks(-1));
 
                         if (isNegation)
                             AddNegationExpression(operatorAction, dynamicExpression.Body);
@@ -491,7 +491,7 @@ namespace PrimeNG.TableFilter.Core
                         var x = _context.ParameterExpression;
                         dynamicExpression = isTimeDefined ? 
                             DynamicExpressionParser.ParseLambda(new[] { x }, null, $"{propertyName}>=@0", dateTime)
-                            : DynamicExpressionParser.ParseLambda(new[] { x }, null, $"{propertyName}>=@0", dateTime.Date.AddDays(1).AddTicks(-1));
+                            : DynamicExpressionParser.ParseLambda(new[] { x }, null, $"{propertyName}>=@0", dateTime.Date);
                         if (isNegation)
                             AddNegationExpression(operatorAction, dynamicExpression.Body);
                         else
