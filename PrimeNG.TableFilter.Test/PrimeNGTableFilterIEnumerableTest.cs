@@ -35,7 +35,7 @@ namespace PrimeNG.TableFilter.Test
                 new TestData { DateTime1 = new DateTime(2021, 11, 1), Num1 = 90, String1 = "B3", NullableFloat=(float?)5.1, Enum1 = EnumStatus.Confirmed},
                 new TestData { DateTime1 = new DateTime(2021, 11, 1), Num1 = 90, String1 = "T7", NullableDouble=10.2},
                 new TestData { DateTime1 = new DateTime(2021, 11, 1), Num1 = 90, String1 = "B1", NullableDecimal = (decimal?)22.5 },
-                new TestData { DateTime1 = new DateTime(2021, 11, 1), Num1 = 90, String1 = "B2", DateTime2 = new DateTime(2021,11,5) },
+                new TestData { DateTime1 = new DateTime(2021, 11, 1), Num1 = 90, String1 = "B2", DateTime2 = new DateTime(2021,11,5),NullableEnum= EnumStatus.Confirmed},
             };
         }
 
@@ -415,9 +415,16 @@ namespace PrimeNG.TableFilter.Test
             var count = dataSet.Count();
             dataSet = dataSet.PrimengTableFilter(filter, out var totalRecord);
 
-            List<EnumStatus?> t = new List<EnumStatus?>();
-
             Assert.Equal(count, totalRecord);
+        }
+
+        [Fact]
+        public void NullableEnumConfirmedFilterShouldReturnFourElementWithSortDate()
+        {
+            var filter = GenerateFilterTableFromJson("{ filters: { NullableEnum: { value: [3], matchMode: \"in\" }  } , first: 0, globalFilter: null, multiSortMeta: [{field: \"DateTime1\", order: 1}], rows: 10,sortOrder: -1 }");
+            var dataSet = GenerateMockTestData();
+            dataSet = dataSet.PrimengTableFilter(filter, out var totalRecord);
+            Assert.Equal(1, totalRecord);
         }
 
     }

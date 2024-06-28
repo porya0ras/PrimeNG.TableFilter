@@ -80,7 +80,7 @@ namespace PrimeNG.TableFilter.Utils
                 foreach (var row in arrayCast)
                 {
                     var enumValue = Enum.ToObject(enumType, Convert.ToByte(row));
-                    var nullableEnumValue = Convert.ChangeType(enumValue, nullableEnumType);
+                    var nullableEnumValue = Activator.CreateInstance(nullableEnumType, enumValue);
                     enumNullableList.Add(nullableEnumValue);
                 }
 
