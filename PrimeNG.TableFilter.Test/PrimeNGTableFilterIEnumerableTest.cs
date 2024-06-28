@@ -414,6 +414,9 @@ namespace PrimeNG.TableFilter.Test
             var dataSet = GenerateMockTestData();
             var count = dataSet.Count();
             dataSet = dataSet.PrimengTableFilter(filter, out var totalRecord);
+
+            List<EnumStatus?> t = new List<EnumStatus?>();
+
             Assert.Equal(count, totalRecord);
         }
 

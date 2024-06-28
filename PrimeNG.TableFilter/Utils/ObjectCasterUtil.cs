@@ -69,14 +69,22 @@ namespace PrimeNG.TableFilter.Utils
             {
                 Type enumType = property.PropertyType.GetGenericArguments()[0];
 
-                Type listType = typeof(List<>).MakeGenericType(enumType);
-                var enumArray = (IList)Activator.CreateInstance(listType);
-                // Cast each element of the input array to the enum type and add to the enum array
+                // Create a nullable enum type
+                Type nullableEnumType = typeof(Nullable<>).MakeGenericType(enumType);
+
+                // Create a list of nullable enum type
+                Type listType = typeof(List<>).MakeGenericType(nullableEnumType);
+                var enumNullableList = (IList)Activator.CreateInstance(listType);
+
+                // Cast each element of the input array to the nullable enum type and add to the nullable list
                 foreach (var row in arrayCast)
                 {
-                    enumArray.Add(Enum.ToObject(enumType, Convert.ToByte(row)));
+                    var enumValue = Enum.ToObject(enumType, Convert.ToByte(row));
+                    var nullableEnumValue = Convert.ChangeType(enumValue, nullableEnumType);
+                    enumNullableList.Add(nullableEnumValue);
                 }
-                return enumArray;
+
+                return enumNullableList;
             }
 
             return arrayCast.ToObject<List<string>>();
